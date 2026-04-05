@@ -53,11 +53,11 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="relative">
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden">
+                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-border p-4">
                   <img
                     src="/larmindia-about.png"
                     alt="Larm India facility"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <div className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-6 rounded-xl">
