@@ -7,21 +7,153 @@ import { useCart } from "@/context/cart-context";
 import { Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getResolvedProductImage } from "@/lib/data";
+import { createClient } from "@/lib/supabase/client";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+    };
+  }
+}
+
+function loadRazorpayScript() {
+  return new Promise<boolean>((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const supabase = useMemo(() => createClient(), []);
 
-  const handleCheckout = () => {
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = getTotal();
+  const tax = Math.round(subtotal * 0.18);
+  const total = Math.round(subtotal * 1.18);
+
+  const handleCheckout = async () => {
+    setCheckoutMessage(null);
     setIsCheckingOut(true);
-    // Simulate checkout process
-    setTimeout(() => {
-      alert("Thank you for your order! This is a demo checkout.");
-      clearCart();
+
+    const isSdkLoaded = await loadRazorpayScript();
+    if (!isSdkLoaded || !window.Razorpay) {
+      setCheckoutMessage("Unable to load Razorpay checkout. Please try again.");
       setIsCheckingOut(false);
-    }, 2000);
+      return;
+    }
+
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData.user;
+
+    const customer = {
+      full_name: (user?.user_metadata?.full_name as string | undefined) ?? "Customer",
+      phone: (user?.user_metadata?.phone as string | undefined) ?? "",
+      address: (user?.user_metadata?.address as string | undefined) ?? "",
+      email: user?.email ?? "",
+    };
+
+    const itemPayload = items.map((item) => ({
+      id: item.product.id,
+      name: item.product.name,
+      quantity: item.quantity,
+      price: item.product.price,
+    }));
+
+    try {
+      const orderRes = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: total * 100,
+          currency: "INR",
+        }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        setCheckoutMessage(orderData.error ?? "Failed to start payment.");
+        setIsCheckingOut(false);
+        return;
+      }
+
+      const razorpay = new window.Razorpay({
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Larm India",
+        description: `Order payment for ${itemCount} item(s)`,
+        order_id: orderData.orderId,
+        prefill: {
+          name: customer.full_name,
+          email: customer.email,
+          contact: customer.phone,
+        },
+        notes: {
+          address: customer.address,
+        },
+        theme: {
+          color: "#c15512",
+        },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          const verifyRes = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ...response,
+              totalAmount: total,
+              items: itemPayload,
+              customer,
+            }),
+          });
+
+          const verifyData = await verifyRes.json();
+
+          if (!verifyRes.ok) {
+            setCheckoutMessage(verifyData.error ?? "Payment completed but order verification failed.");
+            setIsCheckingOut(false);
+            return;
+          }
+
+          clearCart();
+          setCheckoutMessage("Order placed. Check email for order updates.");
+          setIsCheckingOut(false);
+        },
+        modal: {
+          ondismiss: () => {
+            setIsCheckingOut(false);
+          },
+        },
+      });
+
+      razorpay.open();
+    } catch (error) {
+      setCheckoutMessage(error instanceof Error ? error.message : "Checkout failed.");
+      setIsCheckingOut(false);
+    }
   };
 
   return (
@@ -145,10 +277,10 @@ export default function CartPage() {
                   <div className="space-y-3 border-b border-border pb-4 mb-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
-                        Items ({items.reduce((sum, item) => sum + item.quantity, 0)})
+                        Items ({itemCount})
                       </span>
                       <span className="text-foreground font-medium">
-                        ₹{getTotal()}
+                        ₹{subtotal}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
@@ -160,7 +292,7 @@ export default function CartPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax</span>
                       <span className="text-foreground font-medium">
-                        ₹{Math.round(getTotal() * 0.18)}
+                        ₹{tax}
                       </span>
                     </div>
                   </div>
@@ -170,16 +302,22 @@ export default function CartPage() {
                       Total
                     </span>
                     <span className="text-2xl font-bold text-primary">
-                      ₹{Math.round(getTotal() * 1.18)}
+                      ₹{total}
                     </span>
                   </div>
+
+                  {checkoutMessage && (
+                    <p className="mb-4 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                      {checkoutMessage}
+                    </p>
+                  )}
 
                   <Button
                     onClick={handleCheckout}
                     disabled={isCheckingOut}
                     className="w-full mb-3"
                   >
-                    {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
+                    {isCheckingOut ? "Opening Razorpay..." : "Proceed to Checkout"}
                   </Button>
 
                   <Button
