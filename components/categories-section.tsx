@@ -25,7 +25,8 @@ export function CategoriesSection() {
             <Link
               key={category.id}
               href={`/categories/${category.slug}`}
-              className="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 hover:border-green-500 transition-all duration-300 shadow-md hover:shadow-xl"
+              className="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 hover:border-green-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1 animate-fade-up"
+              style={{ animationDelay: `${index * 90}ms` }}
             >
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden">
@@ -54,8 +55,8 @@ export function CategoriesSection() {
                     </p>
                   </div>
                   <div className="flex-shrink-0 ml-4">
-                    <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center group-hover:bg-primary transition-colors">
-                      <ArrowRight className="h-5 w-5 text-primary-foreground group-hover:text-primary-foreground" />
+                    <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center group-hover:bg-emerald-500 transition-colors">
+                      <ArrowRight className="h-5 w-5 text-primary-foreground group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
                 </div>

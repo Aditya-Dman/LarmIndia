@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +35,14 @@ const testimonials = [
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   const next = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
@@ -43,10 +52,12 @@ export function TestimonialsSection() {
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-gradient-to-b from-white to-slate-50">
+    <section className="relative overflow-hidden py-20 lg:py-28 bg-gradient-to-b from-white to-slate-50">
+      <div className="pointer-events-none absolute left-0 top-12 h-60 w-60 rounded-full bg-amber-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 bottom-12 h-60 w-60 rounded-full bg-emerald-200/40 blur-3xl" />
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 animate-fade-up">
           <p className="text-sm font-bold tracking-widest text-amber-600 uppercase mb-2">
             💬 What Customers Say
           </p>
@@ -56,7 +67,7 @@ export function TestimonialsSection() {
         </div>
 
         {/* Testimonial Carousel */}
-        <div className="relative max-w-4xl mx-auto">
+        <div className="relative max-w-4xl mx-auto animate-fade-up [animation-delay:120ms]">
           <div className="overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-in-out"
@@ -67,7 +78,7 @@ export function TestimonialsSection() {
                   key={testimonial.id}
                   className="w-full flex-shrink-0 px-4"
                 >
-                  <div className="bg-card rounded-2xl p-8 lg:p-12 text-center border border-border">
+                  <div className="bg-white/75 backdrop-blur rounded-2xl p-8 lg:p-12 text-center border border-border shadow-lg">
                     {/* Quote Icon */}
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-6">
                       <Quote className="h-6 w-6 text-primary" />
@@ -110,6 +121,7 @@ export function TestimonialsSection() {
               size="icon"
               onClick={prev}
               aria-label="Previous testimonial"
+              className="h-10 w-10 rounded-full"
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
@@ -120,8 +132,8 @@ export function TestimonialsSection() {
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex ? "bg-primary" : "bg-border"
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? "w-6 bg-primary" : "w-2 bg-border"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -133,6 +145,7 @@ export function TestimonialsSection() {
               size="icon"
               onClick={next}
               aria-label="Next testimonial"
+              className="h-10 w-10 rounded-full"
             >
               <ChevronRight className="h-5 w-5" />
             </Button>

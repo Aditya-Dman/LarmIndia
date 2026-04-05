@@ -8,12 +8,14 @@ export function FeaturedProducts() {
   const featuredProducts = getFeaturedProducts();
 
   return (
-    <section className="py-20 lg:py-28 bg-white">
+    <section className="relative overflow-hidden py-20 lg:py-28 bg-gradient-to-b from-white via-amber-50/40 to-white">
+      <div className="pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-amber-300/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-12 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-16 animate-fade-up">
           <div>
-            <p className="text-sm font-bold tracking-widest text-amber-600 uppercase mb-2">
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-amber-100 px-3 py-1 text-xs font-bold tracking-widest text-amber-700 uppercase mb-3">
               ⭐ Best Sellers
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
@@ -33,8 +35,8 @@ export function FeaturedProducts() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.slice(0, 8).map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {featuredProducts.slice(0, 8).map((product, index) => (
+            <ProductCard key={product.id} product={product} className="animate-fade-up" />
           ))}
         </div>
       </div>

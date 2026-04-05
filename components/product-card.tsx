@@ -28,18 +28,19 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   return (
     <div className={cn(
-      "h-full flex flex-col rounded-xl border border-border/50 bg-card overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:border-primary/30",
+      "h-full flex flex-col rounded-2xl border border-border/60 bg-card/95 overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1",
       className
     )}>
       {/* Product Image */}
-      <div className="relative h-48 w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center group">
+      <div className="relative h-52 w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center group">
         <Image
           src={getResolvedProductImage(product)}
           alt={product.name}
           width={200}
           height={200}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         {product.featured && (
           <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-400 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg">
             ★ Featured
@@ -55,7 +56,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       {/* Product Details */}
       <div className="flex flex-col flex-1 p-4">
         <Link href={`/products/${product.id}`}>
-          <h3 className="font-semibold text-base text-foreground hover:text-primary transition-colors line-clamp-2 mb-1">
+          <h3 className="font-semibold text-base text-foreground hover:text-primary transition-colors line-clamp-2 mb-1 min-h-[2.75rem]">
             {product.name}
           </h3>
         </Link>
@@ -76,10 +77,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Quantity and Add to Cart */}
         {product.inStock ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2">
+            <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="h-7 w-7 rounded border border-gray-300 hover:bg-gray-200 text-sm font-semibold"
+                className="h-7 w-7 rounded border border-gray-300 hover:bg-gray-200 text-sm font-semibold transition-colors"
               >
                 −
               </button>
@@ -92,7 +93,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               />
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="h-7 w-7 rounded border border-gray-300 hover:bg-gray-200 text-sm font-semibold"
+                className="h-7 w-7 rounded border border-gray-300 hover:bg-gray-200 text-sm font-semibold transition-colors"
               >
                 +
               </button>
