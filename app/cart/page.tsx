@@ -35,6 +35,12 @@ function loadRazorpayScript() {
   });
 }
 
+function buildRazorpayMeLink(baseUrl: string, amountInRupees: number) {
+  const sanitized = baseUrl.replace(/\/+$/, "");
+  const normalizedAmount = Math.max(1, Math.round(amountInRupees));
+  return `${sanitized}/${normalizedAmount}`;
+}
+
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -45,6 +51,16 @@ export default function CartPage() {
   const subtotal = getTotal();
   const tax = Math.round(subtotal * 0.18);
   const total = Math.round(subtotal * 1.18);
+  const razorpayMeBaseUrl = process.env.NEXT_PUBLIC_RAZORPAY_ME_LINK ?? "https://razorpay.me/@adityadhiman";
+
+  const openRazorpayMeFallback = () => {
+    const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl, total);
+    window.open(paymentLink, "_blank", "noopener,noreferrer");
+    setCheckoutMessage(
+      "Opened Razorpay payment page. Complete payment there, then share transaction details to confirm your order.",
+    );
+    setIsCheckingOut(false);
+  };
 
   const handleCheckout = async () => {
     setCheckoutMessage(null);
@@ -52,8 +68,7 @@ export default function CartPage() {
 
     const isSdkLoaded = await loadRazorpayScript();
     if (!isSdkLoaded || !window.Razorpay) {
-      setCheckoutMessage("Unable to load Razorpay checkout. Please try again.");
-      setIsCheckingOut(false);
+      openRazorpayMeFallback();
       return;
     }
 
@@ -89,6 +104,12 @@ export default function CartPage() {
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
+        const errorText = String(orderData.error ?? "").toLowerCase();
+        if (errorText.includes("key") || errorText.includes("configured")) {
+          openRazorpayMeFallback();
+          return;
+        }
+
         setCheckoutMessage(orderData.error ?? "Failed to start payment.");
         setIsCheckingOut(false);
         return;
