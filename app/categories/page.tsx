@@ -10,7 +10,7 @@ export default function CategoriesPage() {
       <Header />
       <main className="flex-1 bg-background">
         {/* Page Header */}
-        <div className="bg-secondary py-12 lg:py-16">
+        <div className="bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 py-12 lg:py-16 border-b border-border/60">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <p className="text-sm font-medium tracking-widest text-primary uppercase mb-2">
               Browse By Category
@@ -31,7 +31,7 @@ export default function CategoriesPage() {
               <Link
                 key={category.id}
                 href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300"
+                className="group relative overflow-hidden rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-xl hover:-translate-y-1 animate-fade-up"
               >
                 {/* Image */}
                 <div className="aspect-[16/10] overflow-hidden">

@@ -35,7 +35,7 @@ export default function AboutPage() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-secondary py-16 lg:py-24">
+        <section className="bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 py-16 lg:py-24 border-b border-border/60">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -53,7 +53,7 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="relative">
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-border p-4">
+                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white border border-border p-4 shadow-xl">
                   <img
                     src="/larmindia-about.png"
                     alt="Larm India facility"
@@ -74,7 +74,7 @@ export default function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center">
+                <div key={index} className="text-center animate-fade-up">
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
                     <stat.icon className="h-6 w-6 text-primary" />
                   </div>
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {values.map((value, index) => (
-                <div key={index} className="text-center p-6 rounded-xl bg-card border border-border">
+                <div key={index} className="text-center p-6 rounded-xl bg-card border border-border shadow-sm hover:shadow-lg transition-shadow animate-fade-up">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-serif font-bold text-lg mb-4">
                     {index + 1}
                   </div>

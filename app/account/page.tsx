@@ -152,7 +152,7 @@ export default function AccountPage() {
       <Header />
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 space-y-6">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 p-6 shadow-sm animate-fade-up">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">My Account</h1>
               <p className="text-sm text-muted-foreground">
@@ -170,7 +170,7 @@ export default function AccountPage() {
             </div>
           )}
 
-          <Card>
+          <Card className="shadow-sm animate-fade-up">
             <CardHeader>
               <CardTitle>Profile Details</CardTitle>
               <CardDescription>
@@ -220,7 +220,7 @@ export default function AccountPage() {
             </CardContent>
           </Card>
 
-          <Card id="orders">
+          <Card id="orders" className="shadow-sm animate-fade-up">
             <CardHeader>
               <CardTitle>Recent Orders</CardTitle>
               <CardDescription>
@@ -235,7 +235,7 @@ export default function AccountPage() {
               ) : (
                 <div className="space-y-3">
                   {orders.map((order) => (
-                    <div key={order.id} className="rounded-lg border p-4">
+                    <div key={order.id} className="rounded-lg border p-4 bg-card/90 hover:shadow-md transition-shadow">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm font-semibold">Order #{order.id.slice(0, 8).toUpperCase()}</p>
                         <span className="text-xs rounded-full bg-secondary px-2 py-1 font-medium capitalize">

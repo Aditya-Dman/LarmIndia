@@ -52,7 +52,8 @@ export default function ProductsPage() {
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
           {/* Page Header */}
-          <div className="mb-8">
+          <div className="mb-8 rounded-2xl border border-border/70 bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 p-6 shadow-sm animate-fade-up">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-700">Curated Marketplace</p>
             <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">
               Our Products
             </h1>
@@ -78,7 +79,7 @@ export default function ProductsPage() {
           <div className="grid gap-8 lg:grid-cols-4">
             {/* Sidebar Filters */}
             <div className="lg:col-span-1">
-              <div className="rounded-lg border border-border bg-card p-6 sticky top-20">
+              <div className="rounded-xl border border-border/80 bg-card/95 p-6 sticky top-24 shadow-sm">
                 {/* Category Filter */}
                 <div className="mb-6">
                   <h3 className="mb-3 font-semibold text-foreground">Categories</h3>
@@ -192,7 +193,7 @@ export default function ProductsPage() {
             {/* Products Grid */}
             <div className="lg:col-span-3">
               {filteredProducts.length === 0 ? (
-                <div className="rounded-lg border border-border bg-card p-12 text-center">
+                <div className="rounded-xl border border-border/80 bg-card p-12 text-center shadow-sm">
                   <p className="mb-2 text-lg font-medium text-foreground">
                     No products found
                   </p>
@@ -215,8 +216,8 @@ export default function ProductsPage() {
                     Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
                   </div>
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                    {filteredProducts.map((product, index) => (
+                      <ProductCard key={product.id} product={product} className="animate-fade-up" />
                     ))}
                   </div>
                 </>

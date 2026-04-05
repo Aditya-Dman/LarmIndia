@@ -181,7 +181,7 @@ export default function CartPage() {
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
           {/* Page Header */}
-          <div className="mb-8">
+          <div className="mb-8 rounded-2xl border border-border/70 bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 p-6 shadow-sm animate-fade-up">
             <Link href="/products" className="inline-flex items-center gap-2 text-primary hover:underline mb-4">
               <ArrowLeft className="h-4 w-4" />
               Continue Shopping
@@ -190,7 +190,7 @@ export default function CartPage() {
           </div>
 
           {items.length === 0 ? (
-            <div className="rounded-lg border border-border bg-card p-12 text-center">
+            <div className="rounded-xl border border-border bg-card p-12 text-center shadow-sm">
               <p className="mb-4 text-lg text-muted-foreground">Your cart is empty</p>
               <Link href="/products">
                 <Button>Start Shopping</Button>
@@ -204,7 +204,7 @@ export default function CartPage() {
                   {items.map((item) => (
                     <div
                       key={item.product.id}
-                      className="flex gap-4 rounded-lg border border-border bg-card p-4"
+                      className="flex gap-4 rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
                       {/* Product Image */}
                       <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded bg-muted">
@@ -288,7 +288,7 @@ export default function CartPage() {
 
               {/* Order Summary */}
               <div className="lg:col-span-1">
-                <div className="rounded-lg border border-border bg-card p-6 sticky top-20">
+                <div className="rounded-xl border border-border bg-card p-6 sticky top-24 shadow-lg">
                   <h2 className="mb-4 text-lg font-semibold text-foreground">
                     Order Summary
                   </h2>

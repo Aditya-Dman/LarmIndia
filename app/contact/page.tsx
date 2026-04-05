@@ -57,7 +57,7 @@ export default function ContactPage() {
       <Header />
       <main className="flex-1 bg-background">
         {/* Page Header */}
-        <div className="bg-secondary py-12 lg:py-16">
+        <div className="bg-gradient-to-r from-amber-100/80 via-background to-emerald-100/70 py-12 lg:py-16 border-b border-border/60">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <p className="text-sm font-medium tracking-widest text-primary uppercase mb-2">
               Get In Touch
@@ -80,7 +80,7 @@ export default function ContactPage() {
               </h2>
               <div className="space-y-6">
                 {contactInfo.map((item, index) => (
-                  <div key={index} className="flex gap-4">
+                  <div key={index} className="flex gap-4 rounded-xl border border-border/70 bg-card/80 p-4 shadow-sm animate-fade-up">
                     <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
@@ -106,7 +106,7 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <div className="bg-card rounded-2xl border border-border p-6 lg:p-8">
+              <div className="bg-card rounded-2xl border border-border p-6 lg:p-8 shadow-lg animate-fade-up">
                 <h2 className="font-serif text-2xl font-bold text-foreground mb-2">
                   Send Us a Message
                 </h2>

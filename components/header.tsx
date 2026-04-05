@@ -96,6 +96,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_1px_0_0_rgba(15,23,42,0.05)]">
+      <div className="border-b border-white/10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-1.5 text-center text-[11px] font-semibold tracking-wide text-amber-200">
+        Freshly Packed Spices | Pan India Delivery | Trusted by 10,000+ Customers
+      </div>
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex lg:flex-1 hover:opacity-80 transition-opacity">
