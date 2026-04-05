@@ -23,44 +23,50 @@ export interface Category {
 
 const PLACEHOLDER_IMAGE_HOST = "https://via.placeholder.com/";
 
-function getImageKeywordByProductName(name: string): string {
-  const value = name.toLowerCase();
+const LOCAL_PRODUCT_IMAGE_BY_NAME: Record<string, string> = {
+  "chia seeds": "/products/assets/seeds/chia-seeds.png",
+  "mix seeds": "/products/assets/seeds/mix-seed.png",
+  "pumpkin seeds": "/products/assets/seeds/pumpkin-seeds.png",
+  "quinoa seeds": "/products/assets/seeds/quinoa-seeds.png",
+  "ragi seeds": "/products/assets/seeds/ragi-seeds.png",
+  "red quinoa seeds": "/products/assets/seeds/red-quinoa-seeds.png",
+  "mixed herbs": "/products/assets/herbs-and-flakes/mix-herbs.png",
+  "oregano flakes": "/products/assets/herbs-and-flakes/oregano.png",
+  rosemary: "/products/assets/herbs-and-flakes/rosemary.png",
+  basil: "/products/assets/herbs-and-flakes/basil.png",
+  parsley: "/products/assets/herbs-and-flakes/parsley.png",
+  sage: "/products/assets/herbs-and-flakes/sage.png",
+  "premium potato powder": "/products/assets/everyday-ingredients/premium-potato-powder.png",
+  "tomato powder": "/products/assets/everyday-ingredients/tomato-powder.png",
+  "white onion powder": "/products/assets/everyday-ingredients/white-onion-powder.png",
+  "garlic powder": "/products/assets/everyday-ingredients/garlic-powder.png",
+  "pink onion powder": "/products/assets/everyday-ingredients/pink-onion-powder.png",
+  "red onion powder": "/products/assets/everyday-ingredients/red-onion-powder.png",
+  "pizza spice mix": "/products/assets/seasoning-and-spices/pizza-spice-mix.png",
+  "peri peri seasoner": "/products/assets/seasoning-and-spices/peri-peri-seasoning.png",
+  "oregano herbs & spices": "/products/assets/seasoning-and-spices/oregano-seasoning.png",
+  "pizza spice mix premium": "/products/assets/seasoning-and-spices/pizza-spice-mix-premium.png",
+  "garam masala": "/products/assets/seasoning-and-spices/chaat-masala.png",
+  "cumin powder": "/products/assets/seasoning-and-spices/all-in-one-seasoning.png",
+  "coriander powder": "/products/assets/seasoning-and-spices/rajma-masala.png",
+  "turmeric powder": "/products/assets/seasoning-and-spices/chai-masala.png",
+  "black currant": "/products/assets/seasoning-and-spices/chaat-masala.png",
+  "green escort mixture": "/products/assets/seasoning-and-spices/momos-seasoning.png",
+  "mix fruit candy": "/products/assets/seasoning-and-spices/pasta-mix.png",
+  "ram ladoo": "/products/assets/seasoning-and-spices/raita-masala.png",
+  "royal fresh mix 2": "/products/assets/seasoning-and-spices/all-in-one-seasoning.png",
+  "royal fresh mix": "/products/assets/seasoning-and-spices/pasta-mix.png",
+};
 
-  if (value.includes("chia") || value.includes("pumpkin") || value.includes("quinoa") || value.includes("ragi") || value.includes("seed")) {
-    return "seeds,food";
-  }
-
-  if (value.includes("oregano") || value.includes("rosemary") || value.includes("basil") || value.includes("parsley") || value.includes("sage") || value.includes("herb")) {
-    return "herbs,spices";
-  }
-
-  if (value.includes("garam") || value.includes("cumin") || value.includes("coriander") || value.includes("turmeric") || value.includes("peri") || value.includes("spice")) {
-    return "indian-spices,seasoning";
-  }
-
-  if (value.includes("onion") || value.includes("garlic") || value.includes("tomato") || value.includes("potato") || value.includes("powder")) {
-    return "cooking-ingredients,food";
-  }
-
-  if (value.includes("candy") || value.includes("currant") || value.includes("fresh") || value.includes("mix") || value.includes("ladoo")) {
-    return "snack,food";
-  }
-
-  return "spices,food";
-}
-
-function getNameLock(name: string): number {
-  return name
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+function resolveProductImageFromAssets(name: string): string | null {
+  const key = name.trim().toLowerCase();
+  return LOCAL_PRODUCT_IMAGE_BY_NAME[key] ?? null;
 }
 
 export function getResolvedProductImage(product: Pick<Product, "name" | "image">): string {
-  // Replace placeholder image URLs with stable image URLs based on product name keywords.
+  // Replace placeholder image URLs with local asset files mapped by product name.
   if (product.image.startsWith(PLACEHOLDER_IMAGE_HOST)) {
-    const keyword = getImageKeywordByProductName(product.name);
-    const lock = getNameLock(product.name);
-    return `https://loremflickr.com/800/800/${encodeURIComponent(keyword)}?lock=${lock}`;
+    return resolveProductImageFromAssets(product.name) ?? "/placeholder.jpg";
   }
 
   return product.image;

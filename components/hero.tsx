@@ -64,14 +64,14 @@ export function Hero() {
               <div className="space-y-4">
                 <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=400&width=320"
+                    src="/products/assets/seasoning-and-spices/pizza-spice-mix.png"
                     alt="Premium spices"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="aspect-square rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20 overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=300&width=300"
+                    src="/products/assets/herbs-and-flakes/mix-herbs.png"
                     alt="Fresh herbs"
                     className="w-full h-full object-cover"
                   />
@@ -80,14 +80,14 @@ export function Hero() {
               <div className="space-y-4 pt-8">
                 <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=300&width=300"
+                    src="/products/assets/seeds/chia-seeds.png"
                     alt="Spice collection"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="aspect-[4/5] rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20 overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=400&width=320"
+                    src="/products/assets/everyday-ingredients/garlic-powder.png"
                     alt="Traditional spices"
                     className="w-full h-full object-cover"
                   />
