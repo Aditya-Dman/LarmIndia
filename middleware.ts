@@ -42,7 +42,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if ((user || hasDemoBypass) && isAuthRoute) {
+  // Only authenticated users should be redirected away from /auth.
+  // Demo bypass should not lock users out of the login/signup page.
+  if (user && isAuthRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);
