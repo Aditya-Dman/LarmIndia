@@ -1,0 +1,187 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Menu, X, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
+import { cn } from "@/lib/utils";
+import { useCart } from "@/context/cart-context";
+import { createClient } from "@/lib/supabase/client";
+
+const navigation = [
+  { name: "Home", href: "/" },
+  { name: "Products", href: "/products" },
+  { name: "Categories", href: "/categories" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+];
+
+export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const { getItemCount } = useCart();
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const itemCount = getItemCount();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncAuthState = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (isMounted) {
+        setIsAuthenticated(Boolean(data.session));
+      }
+    };
+
+    syncAuthState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isMounted) {
+        setIsAuthenticated(Boolean(session));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await supabase.auth.signOut();
+    document.cookie = "demo_bypass=; path=/; max-age=0";
+    setIsSigningOut(false);
+    router.replace("/auth");
+    router.refresh();
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-gradient-to-r from-background via-background to-primary/5 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
+        {/* Logo */}
+        <Link href="/" className="flex lg:flex-1 hover:opacity-80 transition-opacity">
+          <Logo size="md" />
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex lg:gap-x-12">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary relative group"
+            >
+              {item.name}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:w-full transition-all duration-300"></span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Desktop Actions */}
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-3">
+          {isAuthenticated && (
+            <Link href="/admin">
+              <Button variant="outline" className="font-semibold">Admin Dashboard</Button>
+            </Link>
+          )}
+          <Link href="/cart">
+            <Button variant="ghost" size="icon" aria-label="Shopping cart" className="relative hover:bg-primary/10">
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-xs font-bold text-white shadow-lg">
+                  {itemCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+          {isAuthenticated ? (
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="font-semibold"
+            >
+              {isSigningOut ? "Signing out..." : "Logout"}
+            </Button>
+          ) : (
+            <Link href="/auth">
+              <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 font-semibold shadow-lg">
+                Login / Signup
+              </Button>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <div className="flex lg:hidden gap-x-2">
+          <Link href="/cart">
+            <Button variant="ghost" size="icon" aria-label="Shopping cart" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {itemCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <div
+        className={cn(
+          "lg:hidden overflow-hidden transition-all duration-300 ease-in-out",
+          mobileMenuOpen ? "max-h-96" : "max-h-0"
+        )}
+      >
+        <div className="space-y-1 px-4 pb-4">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="block rounded-lg px-3 py-2 text-base font-medium text-foreground/80 hover:bg-secondary hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+          <div className="pt-4 border-t border-border">
+            {isAuthenticated && (
+              <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full mb-2" variant="secondary">Admin Dashboard</Button>
+              </Link>
+            )}
+            {isAuthenticated ? (
+              <Button className="w-full" variant="outline" onClick={handleSignOut} disabled={isSigningOut}>
+                {isSigningOut ? "Signing out..." : "Logout"}
+              </Button>
+            ) : (
+              <Link href="/auth" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full">Login / Signup</Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
