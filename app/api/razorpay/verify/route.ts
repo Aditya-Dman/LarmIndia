@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 interface VerifyPaymentBody {
   razorpay_order_id: string;
@@ -44,9 +45,14 @@ export async function POST(request: Request) {
     }
 
     const adminClient = createAdminSupabaseClient();
+    const userClient = await createServerSupabaseClient();
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
 
     if (adminClient) {
       const { error } = await adminClient.from("orders").insert({
+        user_id: user?.id ?? null,
         customer_name: body.customer?.full_name ?? "Customer",
         customer_phone: body.customer?.phone ?? "",
         customer_address: body.customer?.address ?? "",

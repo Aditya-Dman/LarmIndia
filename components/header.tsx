@@ -3,12 +3,25 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingCart, CircleUserRound, Package, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/cart-context";
 import { createClient } from "@/lib/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type HeaderUser = {
+  email: string;
+  fullName: string;
+};
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -22,6 +35,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [currentUser, setCurrentUser] = useState<HeaderUser | null>(null);
   const { getItemCount } = useCart();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -33,7 +47,16 @@ export function Header() {
     const syncAuthState = async () => {
       const { data } = await supabase.auth.getSession();
       if (isMounted) {
-        setIsAuthenticated(Boolean(data.session));
+        const sessionUser = data.session?.user;
+        setIsAuthenticated(Boolean(sessionUser));
+        if (sessionUser) {
+          setCurrentUser({
+            email: sessionUser.email ?? "",
+            fullName: (sessionUser.user_metadata?.full_name as string | undefined) ?? "My Account",
+          });
+        } else {
+          setCurrentUser(null);
+        }
       }
     };
 
@@ -44,6 +67,14 @@ export function Header() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setIsAuthenticated(Boolean(session));
+        if (session?.user) {
+          setCurrentUser({
+            email: session.user.email ?? "",
+            fullName: (session.user.user_metadata?.full_name as string | undefined) ?? "My Account",
+          });
+        } else {
+          setCurrentUser(null);
+        }
       }
     });
 
@@ -91,6 +122,44 @@ export function Header() {
               <Button variant="outline" className="font-semibold">Admin Dashboard</Button>
             </Link>
           )}
+          {isAuthenticated && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Open account menu">
+                  <CircleUserRound className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="space-y-1">
+                  <p className="font-semibold text-sm leading-none">{currentUser?.fullName || "My Account"}</p>
+                  <p className="text-xs text-muted-foreground break-all">{currentUser?.email || ""}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/account" className="cursor-pointer">
+                    <User className="h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/account#orders" className="cursor-pointer">
+                    <Package className="h-4 w-4" />
+                    Orders
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    void handleSignOut();
+                  }}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <Link href="/cart">
             <Button variant="ghost" size="icon" aria-label="Shopping cart" className="relative hover:bg-primary/10">
               <ShoppingCart className="h-5 w-5" />
@@ -101,16 +170,7 @@ export function Header() {
               )}
             </Button>
           </Link>
-          {isAuthenticated ? (
-            <Button
-              variant="outline"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="font-semibold"
-            >
-              {isSigningOut ? "Signing out..." : "Logout"}
-            </Button>
-          ) : (
+          {isAuthenticated ? null : (
             <Link href="/auth">
               <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 font-semibold shadow-lg">
                 Login / Signup
@@ -165,6 +225,16 @@ export function Header() {
             </Link>
           ))}
           <div className="pt-4 border-t border-border">
+            {isAuthenticated && (
+              <Link href="/account" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full mb-2" variant="secondary">Profile</Button>
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link href="/account#orders" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full mb-2" variant="secondary">Orders</Button>
+              </Link>
+            )}
             {isAuthenticated && (
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full mb-2" variant="secondary">Admin Dashboard</Button>
