@@ -23,10 +23,44 @@ export interface Category {
 
 const PLACEHOLDER_IMAGE_HOST = "https://via.placeholder.com/";
 
+function getImageKeywordByProductName(name: string): string {
+  const value = name.toLowerCase();
+
+  if (value.includes("chia") || value.includes("pumpkin") || value.includes("quinoa") || value.includes("ragi") || value.includes("seed")) {
+    return "seeds,food";
+  }
+
+  if (value.includes("oregano") || value.includes("rosemary") || value.includes("basil") || value.includes("parsley") || value.includes("sage") || value.includes("herb")) {
+    return "herbs,spices";
+  }
+
+  if (value.includes("garam") || value.includes("cumin") || value.includes("coriander") || value.includes("turmeric") || value.includes("peri") || value.includes("spice")) {
+    return "indian-spices,seasoning";
+  }
+
+  if (value.includes("onion") || value.includes("garlic") || value.includes("tomato") || value.includes("potato") || value.includes("powder")) {
+    return "cooking-ingredients,food";
+  }
+
+  if (value.includes("candy") || value.includes("currant") || value.includes("fresh") || value.includes("mix") || value.includes("ladoo")) {
+    return "snack,food";
+  }
+
+  return "spices,food";
+}
+
+function getNameLock(name: string): number {
+  return name
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+}
+
 export function getResolvedProductImage(product: Pick<Product, "name" | "image">): string {
-  // Replace placeholder image URLs with a photo search URL based on the product name.
+  // Replace placeholder image URLs with stable image URLs based on product name keywords.
   if (product.image.startsWith(PLACEHOLDER_IMAGE_HOST)) {
-    return `https://source.unsplash.com/800x800/?${encodeURIComponent(`${product.name},spice,seasoning,food`)}`;
+    const keyword = getImageKeywordByProductName(product.name);
+    const lock = getNameLock(product.name);
+    return `https://loremflickr.com/800/800/${encodeURIComponent(keyword)}?lock=${lock}`;
   }
 
   return product.image;
