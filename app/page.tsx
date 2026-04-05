@@ -7,6 +7,7 @@ import { FeaturesSection } from "@/components/features-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { CTASection } from "@/components/cta-section";
 import { NewsletterSection } from "@/components/newsletter-section";
+import { TrustStrip } from "@/components/trust-strip";
 
 export default function HomePage() {
   return (
@@ -14,6 +15,7 @@ export default function HomePage() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <TrustStrip />
         <CategoriesSection />
         <FeaturedProducts />
         <FeaturesSection />

@@ -28,7 +28,7 @@ export function FeaturesSection() {
     <section className="py-20 lg:py-28 bg-gradient-to-br from-slate-50 via-white to-green-50">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 animate-fade-up">
           <p className="text-sm font-bold tracking-widest text-green-600 uppercase mb-2">
             💪 Why Choose Us
           </p>
@@ -40,7 +40,7 @@ export function FeaturesSection() {
         {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="text-center group">
+            <div key={index} className="animate-fade-up text-center group rounded-2xl border border-border/60 bg-white/80 p-6 shadow-sm hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${index * 120}ms` }}>
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 group-hover:from-green-600 group-hover:to-emerald-600 transition-all duration-300 mb-6 shadow-lg">
                 <feature.icon className="h-10 w-10 text-green-600 group-hover:text-white transition-colors duration-300" />
               </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, ShoppingCart, CircleUserRound, Package, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -38,6 +38,7 @@ export function Header() {
   const [currentUser, setCurrentUser] = useState<HeaderUser | null>(null);
   const { getItemCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
   const itemCount = getItemCount();
 
@@ -107,10 +108,18 @@ export function Header() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-[15px] font-semibold text-foreground/75 transition-colors hover:text-primary relative group"
+              className={cn(
+                "text-[15px] font-semibold transition-colors relative group",
+                pathname === item.href ? "text-primary" : "text-foreground/75 hover:text-primary",
+              )}
             >
               {item.name}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:w-full transition-all duration-300"></span>
+              <span
+                className={cn(
+                  "absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 transition-all duration-300",
+                  pathname === item.href ? "w-full" : "w-0 group-hover:w-full",
+                )}
+              ></span>
             </Link>
           ))}
         </div>
@@ -218,7 +227,12 @@ export function Header() {
             <Link
               key={item.name}
               href={item.href}
-              className="block rounded-lg px-3 py-2 text-base font-medium text-foreground/80 hover:bg-secondary hover:text-primary"
+              className={cn(
+                "block rounded-lg px-3 py-2 text-base font-medium transition-colors",
+                pathname === item.href
+                  ? "bg-secondary text-primary"
+                  : "text-foreground/80 hover:bg-secondary hover:text-primary",
+              )}
               onClick={() => setMobileMenuOpen(false)}
             >
               {item.name}
