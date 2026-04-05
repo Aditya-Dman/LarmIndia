@@ -47,12 +47,6 @@ export default function AuthPage() {
   const [signupAddress, setSignupAddress] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
 
-  const [phoneName, setPhoneName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("+91");
-  const [phoneAddress, setPhoneAddress] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     setMessage(null);
@@ -125,69 +119,6 @@ export default function AuthPage() {
     });
   };
 
-  const handleSendOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    setIsLoading(true);
-
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: phoneNumber,
-      options: {
-        shouldCreateUser: true,
-        data: {
-          full_name: phoneName,
-          phone: phoneNumber,
-          address: phoneAddress,
-        },
-      },
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      setMessage({ type: "error", text: error.message });
-      return;
-    }
-
-    setOtpSent(true);
-    setMessage({ type: "success", text: "OTP sent to your phone number." });
-  };
-
-  const handleVerifyOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    setIsLoading(true);
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: phoneNumber,
-      token: otpCode,
-      type: "sms",
-    });
-
-    if (error) {
-      setIsLoading(false);
-      setMessage({ type: "error", text: error.message });
-      return;
-    }
-
-    if (data.user?.id) {
-      try {
-        await saveProfile(data.user.id, {
-          full_name: phoneName,
-          phone: phoneNumber,
-          address: phoneAddress,
-        });
-      } catch {
-        // Ignore profile insert errors so auth still succeeds.
-      }
-    }
-
-    setIsLoading(false);
-    document.cookie = "demo_bypass=; path=/; max-age=0";
-    router.replace("/");
-    router.refresh();
-  };
-
   const handleDemoBypass = () => {
     document.cookie = "demo_bypass=1; path=/; max-age=86400";
     router.replace("/");
@@ -200,15 +131,14 @@ export default function AuthPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Welcome to Larm India</CardTitle>
           <CardDescription>
-            Login or sign up to continue shopping. Supports email/password and phone OTP.
+            Login or sign up to continue shopping.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="signup">Signup</TabsTrigger>
-              <TabsTrigger value="phone">Phone OTP</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="mt-4">
@@ -302,61 +232,6 @@ export default function AuthPage() {
               </form>
             </TabsContent>
 
-            <TabsContent value="phone" className="mt-4">
-              <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone-name">Full Name</Label>
-                  <Input
-                    id="phone-name"
-                    placeholder="Your full name"
-                    value={phoneName}
-                    onChange={(e) => setPhoneName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone-number">Phone Number</Label>
-                  <Input
-                    id="phone-number"
-                    placeholder="+9198XXXXXXXX"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone-address">Delivery Address</Label>
-                  <Textarea
-                    id="phone-address"
-                    placeholder="House no, street, city, pin code"
-                    value={phoneAddress}
-                    onChange={(e) => setPhoneAddress(e.target.value)}
-                    required
-                  />
-                </div>
-
-                {otpSent && (
-                  <div className="space-y-2">
-                    <Label htmlFor="otp-code">OTP Code</Label>
-                    <Input
-                      id="otp-code"
-                      placeholder="Enter 6-digit OTP"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      required
-                    />
-                  </div>
-                )}
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading
-                    ? "Please wait..."
-                    : otpSent
-                      ? "Verify OTP"
-                      : "Send OTP"}
-                </Button>
-              </form>
-            </TabsContent>
           </Tabs>
 
           {message && (
