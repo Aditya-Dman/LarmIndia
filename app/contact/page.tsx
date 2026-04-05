@@ -97,7 +97,7 @@ export default function ContactPage() {
               {/* Map Placeholder */}
               <div className="mt-8 aspect-video rounded-xl bg-muted overflow-hidden">
                 <img
-                  src="/placeholder.svg?height=300&width=400"
+                  src="/contact-page.png"
                   alt="Location map"
                   className="w-full h-full object-cover"
                 />

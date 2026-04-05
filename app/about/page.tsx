@@ -55,7 +55,7 @@ export default function AboutPage() {
               <div className="relative">
                 <div className="aspect-[4/3] rounded-2xl overflow-hidden">
                   <img
-                    src="/placeholder.svg?height=450&width=600"
+                    src="/larmindia-about.png"
                     alt="Larm India facility"
                     className="w-full h-full object-cover"
                   />
