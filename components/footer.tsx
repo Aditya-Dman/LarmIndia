@@ -4,25 +4,25 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 const footerLinks = {
   collections: [
-    { name: "Seasonings & Spices", href: "/categories/seasonings-spices" },
+    { name: "Seasoning & Spices", href: "/categories/seasoning-spices" },
     { name: "Sachets", href: "/categories/sachets" },
-    { name: "Herbs & Mixes", href: "/categories/herbs-mixes" },
-    { name: "Daily Ingredients", href: "/categories/daily-ingredients" },
+    { name: "Herbs & Flakes", href: "/categories/herbs-flakes" },
+    { name: "Everyday Ingredients", href: "/categories/everyday-ingredients" },
     { name: "Mouth Fresheners", href: "/categories/mouth-fresheners" },
     { name: "Seeds", href: "/categories/seeds" },
   ],
   quickLinks: [
     { name: "About Us", href: "/about" },
-    { name: "Service", href: "/service" },
     { name: "Shop Products", href: "/products" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Events", href: "/events" },
+    { name: "All Categories", href: "/categories" },
+    { name: "Contact", href: "/contact" },
+    { name: "My Account", href: "/account" },
   ],
 };
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-t border-slate-700">
+    <footer className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white border-t border-slate-700">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Brand Section */}
@@ -57,11 +57,8 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.collections.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-300 hover:text-amber-300 transition-colors font-medium"
-                  >
-                    → {link.name}
+                  <Link href={link.href} className="text-sm text-gray-300 hover:text-amber-300 transition-colors font-medium">
+                    {link.name}
                   </Link>
                 </li>
               ))}
@@ -76,11 +73,8 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-300 hover:text-amber-300 transition-colors font-medium"
-                  >
-                    → {link.name}
+                  <Link href={link.href} className="text-sm text-gray-300 hover:text-amber-300 transition-colors font-medium">
+                    {link.name}
                   </Link>
                 </li>
               ))}
@@ -96,16 +90,16 @@ export function Footer() {
             </p>
             <div className="flex gap-6">
               <Link
-                href="/privacy"
+                href="/about"
                 className="text-sm text-gray-400 hover:text-amber-300 transition-colors font-medium"
               >
-                Privacy Policy
+                About
               </Link>
               <Link
-                href="/terms"
+                href="/contact"
                 className="text-sm text-gray-400 hover:text-amber-300 transition-colors font-medium"
               >
-                Terms of Service
+                Contact
               </Link>
             </div>
           </div>

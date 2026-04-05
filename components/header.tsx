@@ -94,20 +94,20 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-gradient-to-r from-background via-background to-primary/5 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_1px_0_0_rgba(15,23,42,0.05)]">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex lg:flex-1 hover:opacity-80 transition-opacity">
-          <Logo size="md" />
+          <Logo size="sm" />
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:gap-x-12">
+        <div className="hidden lg:flex lg:gap-x-9">
           {navigation.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-sm font-semibold text-foreground/70 transition-colors hover:text-primary relative group"
+              className="text-[15px] font-semibold text-foreground/75 transition-colors hover:text-primary relative group"
             >
               {item.name}
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 group-hover:w-full transition-all duration-300"></span>
@@ -119,13 +119,13 @@ export function Header() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-3">
           {isAuthenticated && (
             <Link href="/admin">
-              <Button variant="outline" className="font-semibold">Admin Dashboard</Button>
+              <Button variant="outline" className="font-semibold h-9">Admin Dashboard</Button>
             </Link>
           )}
           {isAuthenticated && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="Open account menu">
+                <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Open account menu">
                   <CircleUserRound className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -161,7 +161,7 @@ export function Header() {
             </DropdownMenu>
           )}
           <Link href="/cart">
-            <Button variant="ghost" size="icon" aria-label="Shopping cart" className="relative hover:bg-primary/10">
+            <Button variant="ghost" size="icon" aria-label="Shopping cart" className="relative hover:bg-primary/10 h-9 w-9">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-green-600 to-emerald-600 text-xs font-bold text-white shadow-lg">
