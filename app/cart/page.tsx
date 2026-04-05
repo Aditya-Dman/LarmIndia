@@ -35,10 +35,8 @@ function loadRazorpayScript() {
   });
 }
 
-function buildRazorpayMeLink(baseUrl: string, amountInRupees: number) {
-  const sanitized = baseUrl.replace(/\/+$/, "");
-  const normalizedAmount = Math.max(1, Math.round(amountInRupees));
-  return `${sanitized}/${normalizedAmount}`;
+function buildRazorpayMeLink(baseUrl: string) {
+  return baseUrl.replace(/\/+$/, "");
 }
 
 export default function CartPage() {
@@ -54,7 +52,7 @@ export default function CartPage() {
   const razorpayMeBaseUrl = process.env.NEXT_PUBLIC_RAZORPAY_ME_LINK ?? "https://razorpay.me/@adityadhiman";
 
   const openRazorpayMeFallback = () => {
-    const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl, total);
+    const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl);
     window.open(paymentLink, "_blank", "noopener,noreferrer");
     setCheckoutMessage(
       "Opened Razorpay payment page. Complete payment there, then share transaction details to confirm your order.",
