@@ -94,19 +94,43 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
       </div>
 
       {canSlide && (
-        <div className="mt-3 flex items-center justify-center gap-2">
-          {galleryImages.map((image, index) => (
-            <button
-              key={`${image}-${index}`}
-              type="button"
-              onClick={() => goTo(index)}
-              className={`h-2.5 rounded-full transition-all ${
-                index === activeIndex ? "w-8 bg-primary" : "w-2.5 bg-border"
-              }`}
-              aria-label={`Open image ${index + 1}`}
-            />
-          ))}
-        </div>
+        <>
+          <div className="mt-4 hidden gap-3 sm:grid sm:grid-cols-4">
+            {galleryImages.map((image, index) => (
+              <button
+                key={`${image}-thumb-${index}`}
+                type="button"
+                onClick={() => goTo(index)}
+                className={`group relative overflow-hidden rounded-lg border bg-card transition-all ${
+                  index === activeIndex
+                    ? "border-primary ring-2 ring-primary/30"
+                    : "border-border/80 hover:border-primary/50"
+                }`}
+                aria-label={`Open image ${index + 1}`}
+              >
+                <img
+                  src={image}
+                  alt={`${name} thumbnail ${index + 1}`}
+                  className="aspect-square h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-3 flex items-center justify-center gap-2 sm:hidden">
+            {galleryImages.map((image, index) => (
+              <button
+                key={`${image}-${index}`}
+                type="button"
+                onClick={() => goTo(index)}
+                className={`h-2.5 rounded-full transition-all ${
+                  index === activeIndex ? "w-8 bg-primary" : "w-2.5 bg-border"
+                }`}
+                aria-label={`Open image ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <p className="mt-2 text-center text-xs text-muted-foreground sm:hidden">
