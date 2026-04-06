@@ -50,16 +50,24 @@ export async function POST(request: Request) {
       data: { user },
     } = await userClient.auth.getUser();
 
+    let createdOrder: { id: string; status: string } | null = null;
+
     if (adminClient) {
-      const { error } = await adminClient.from("orders").insert({
+      const orderRecord = {
         user_id: user?.id ?? null,
         customer_name: body.customer?.full_name ?? "Customer",
         customer_phone: body.customer?.phone ?? "",
         customer_address: body.customer?.address ?? "",
         items: body.items,
         total_amount: Number(body.totalAmount ?? 0),
-        status: "paid",
-      });
+        status: "placed",
+      };
+
+      const { data, error } = await adminClient
+        .from("orders")
+        .insert(orderRecord)
+        .select("id, status")
+        .single();
 
       if (error) {
         return NextResponse.json(
@@ -69,11 +77,15 @@ export async function POST(request: Request) {
           { status: 500 },
         );
       }
+
+      createdOrder = (data as { id: string; status: string } | null) ?? null;
     }
 
     return NextResponse.json({
       success: true,
-      message: "Order placed. Check email for order updates.",
+      message: "Yay! Order placed successfully.",
+      orderId: createdOrder?.id ?? null,
+      status: createdOrder?.status ?? "placed",
     });
   } catch (error) {
     return NextResponse.json(

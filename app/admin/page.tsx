@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { AdminOrdersManager } from "@/components/admin-orders-manager";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,16 @@ interface ProfileRow {
   address: string;
   created_at: string;
   updated_at: string;
+}
+
+interface AdminOrderRow {
+  id: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  status: string | null;
+  total_amount: number | null;
+  created_at: string;
+  items: Array<{ id: string; name: string; quantity: number; price: number }> | null;
 }
 
 function isAuthorizedAdmin(email: string | null | undefined) {
@@ -95,12 +106,15 @@ export default async function AdminDashboardPage() {
       .select("id, full_name, phone, address, created_at, updated_at")
       .order("created_at", { ascending: false })
       .limit(200),
-    adminClient.from("orders").select("*").order("created_at", { ascending: false }).limit(200),
+    adminClient
+      .from("orders")
+      .select("id, customer_name, customer_phone, status, total_amount, created_at, items")
+      .order("created_at", { ascending: false })
+      .limit(200),
   ]);
 
   const profileRows = (profiles ?? []) as ProfileRow[];
-  const orderRows = (orders ?? []) as Array<Record<string, unknown>>;
-  const orderColumns = orderRows.length > 0 ? Object.keys(orderRows[0]) : [];
+  const orderRows = (orders ?? []) as AdminOrderRow[];
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 lg:px-8">
@@ -178,7 +192,7 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Orders</CardTitle>
-            <CardDescription>All order rows from Supabase orders table</CardDescription>
+            <CardDescription>Update tracking status for each order</CardDescription>
           </CardHeader>
           <CardContent>
             {ordersError ? (
@@ -188,35 +202,8 @@ export default async function AdminDashboardPage() {
                   If this table does not exist yet, create orders table in Supabase and this section will start showing data.
                 </p>
               </div>
-            ) : orderRows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No orders found.</p>
             ) : (
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full min-w-[900px] text-sm">
-                  <thead className="bg-muted/50 text-left">
-                    <tr>
-                      {orderColumns.map((column) => (
-                        <th key={column} className="px-3 py-2 font-medium capitalize">
-                          {column.replaceAll("_", " ")}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderRows.map((row, idx) => (
-                      <tr key={String(row.id ?? idx)} className="border-t">
-                        {orderColumns.map((column) => (
-                          <td key={`${String(row.id ?? idx)}-${column}`} className="px-3 py-2 align-top">
-                            {typeof row[column] === "object"
-                              ? JSON.stringify(row[column])
-                              : String(row[column] ?? "")}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <AdminOrdersManager initialOrders={orderRows} />
             )}
           </CardContent>
         </Card>

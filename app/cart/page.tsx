@@ -158,7 +158,12 @@ export default function CartPage() {
           }
 
           clearCart();
-          setCheckoutMessage("Order placed. Check email for order updates.");
+          const shortOrderId = String(verifyData.orderId ?? "").slice(0, 8).toUpperCase();
+          setCheckoutMessage(
+            shortOrderId
+              ? `Yay! Order placed successfully. Order #${shortOrderId}. Track it in My Account > Recent Orders.`
+              : "Yay! Order placed successfully. Track it in My Account > Recent Orders.",
+          );
           setIsCheckingOut(false);
         },
         modal: {

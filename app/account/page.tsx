@@ -29,6 +29,25 @@ type OrderRow = {
   created_at: string;
 };
 
+const orderTrackingSteps = ["placed", "in_transit", "shipped", "out_for_delivery", "delivered"] as const;
+
+function getStatusLabel(status: string) {
+  return status.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getStatusBadgeClass(status: string) {
+  if (status === "delivered") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+  if (status === "out_for_delivery") {
+    return "bg-blue-100 text-blue-700";
+  }
+  if (status === "cancelled") {
+    return "bg-red-100 text-red-700";
+  }
+  return "bg-secondary text-foreground";
+}
+
 export default function AccountPage() {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -236,12 +255,44 @@ export default function AccountPage() {
                 <div className="space-y-3">
                   {orders.map((order) => (
                     <div key={order.id} className="rounded-lg border p-4 bg-card/90 hover:shadow-md transition-shadow">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm font-semibold">Order #{order.id.slice(0, 8).toUpperCase()}</p>
-                        <span className="text-xs rounded-full bg-secondary px-2 py-1 font-medium capitalize">
-                          {order.status}
-                        </span>
-                      </div>
+                      {(() => {
+                        const statusValue = (order.status ?? "placed").toLowerCase();
+                        const currentStepIndex = orderTrackingSteps.indexOf(
+                          statusValue as (typeof orderTrackingSteps)[number],
+                        );
+
+                        return (
+                          <>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <p className="text-sm font-semibold">Order #{order.id.slice(0, 8).toUpperCase()}</p>
+                              <span className={`text-xs rounded-full px-2 py-1 font-medium ${getStatusBadgeClass(statusValue)}`}>
+                                {getStatusLabel(statusValue)}
+                              </span>
+                            </div>
+                            <div className="mt-3">
+                              <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-wide text-muted-foreground">
+                                <span>Tracking</span>
+                                <span>{getStatusLabel(statusValue)}</span>
+                              </div>
+                              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-amber-500 to-emerald-500"
+                                  style={{
+                                    width:
+                                      statusValue === "cancelled"
+                                        ? "0%"
+                                        : `${
+                                            currentStepIndex >= 0
+                                              ? ((currentStepIndex + 1) / orderTrackingSteps.length) * 100
+                                              : 20
+                                          }%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                       <p className="mt-1 text-sm text-muted-foreground">
                         Placed on {new Date(order.created_at).toLocaleString()}
                       </p>
