@@ -22,6 +22,11 @@ const statusOptions = [
   "cancelled",
 ] as const;
 
+function normalizeStatus(value: string | null | undefined) {
+  const next = String(value ?? "placed").toLowerCase();
+  return statusOptions.includes(next as (typeof statusOptions)[number]) ? next : "placed";
+}
+
 function toLabel(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -31,7 +36,7 @@ export function AdminOrdersManager({ initialOrders }: { initialOrders: AdminOrde
   const [draftStatus, setDraftStatus] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     initialOrders.forEach((order) => {
-      initial[order.id] = String(order.status ?? "placed").toLowerCase();
+      initial[order.id] = normalizeStatus(order.status);
     });
     return initial;
   });
@@ -102,7 +107,7 @@ export function AdminOrdersManager({ initialOrders }: { initialOrders: AdminOrde
           </thead>
           <tbody>
             {sortedOrders.map((order) => {
-              const currentStatus = draftStatus[order.id] ?? String(order.status ?? "placed").toLowerCase();
+              const currentStatus = draftStatus[order.id] ?? normalizeStatus(order.status);
 
               return (
                 <tr key={order.id} className="border-t">
