@@ -97,6 +97,3 @@ Typical Vercel settings:
 4. Open a pull request
 
 ---
-
-## 📄 License
-No license specified yet.
