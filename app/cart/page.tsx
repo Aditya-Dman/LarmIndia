@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
-import { Trash2, ArrowLeft, CheckCircle2, Flame, Info } from "lucide-react";
+import { Trash2, ArrowLeft, CheckCircle2, Flame, Info, ShieldCheck, Leaf, Truck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -442,6 +442,21 @@ export default function CartPage() {
                       Continue Shopping
                     </Link>
                   </Button>
+
+                  <div className="mt-4 grid gap-2 rounded-lg border border-border/70 bg-muted/40 p-3">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      <span>Secure payment processing</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Leaf className="h-4 w-4 text-emerald-600" />
+                      <span>Freshness guarantee on every batch</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Truck className="h-4 w-4 text-emerald-600" />
+                      <span>Fast dispatch after confirmation</span>
+                    </div>
+                  </div>
 
                   <div className="mt-6 pt-6 border-t border-border">
                     <details className="group">

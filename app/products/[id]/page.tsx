@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card";
 import { products, getProductById, getProductsByCategory, getCategoryBySlug, getResolvedProductImage } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShoppingBag, Truck, Shield, Leaf, Minus, Plus } from "lucide-react";
+import { ProductImageGallery } from "@/components/product-image-gallery";
 
 export function generateStaticParams() {
   return products.map((product) => ({
@@ -26,6 +27,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const category = getCategoryBySlug(product.category);
+  const galleryImages = [
+    getResolvedProductImage(product),
+    category?.image ?? "",
+    "/larmindia-about.png",
+  ];
   const relatedProducts = getProductsByCategory(product.category)
     .filter((p) => p.id !== product.id)
     .slice(0, 4);
@@ -35,7 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <Header />
       <main className="flex-1 bg-background">
         {/* Breadcrumb */}
-        <div className="bg-secondary py-4">
+        <div className="bg-secondary/90 py-4">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-primary transition-colors">Home</Link>
@@ -60,22 +66,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12">
               {/* Product Image */}
-              <div className="relative">
-                <div className="aspect-square rounded-2xl overflow-hidden bg-secondary">
-                  <img
-                    src={getResolvedProductImage(product)}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {product.featured && (
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-full">
-                      Featured
-                    </span>
-                  </div>
-                )}
-              </div>
+              <ProductImageGallery images={galleryImages} name={product.name} featured={product.featured} />
 
               {/* Product Info */}
               <div>
