@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { sendOrderStatusEmail } from "@/lib/notifications/order-email";
 
 const allowedStatuses = new Set([
   "placed",
@@ -61,6 +62,34 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const { data: orderData } = await adminClient
+      .from("orders")
+      .select("id, user_id, customer_name, total_amount, status")
+      .eq("id", orderId)
+      .maybeSingle<{
+        id: string;
+        user_id: string | null;
+        customer_name: string | null;
+        total_amount: number | null;
+        status: string | null;
+      }>();
+
+    let recipientEmail = "";
+    if (orderData?.user_id) {
+      const { data: userData } = await adminClient.auth.admin.getUserById(orderData.user_id);
+      recipientEmail = userData.user?.email ?? "";
+    }
+
+    if (recipientEmail && orderData?.id && orderData.status) {
+      await sendOrderStatusEmail({
+        to: recipientEmail,
+        customerName: orderData.customer_name ?? "Customer",
+        orderId: orderData.id,
+        status: orderData.status,
+        totalAmount: Number(orderData.total_amount ?? 0),
+      });
     }
 
     return NextResponse.json({ success: true, status });

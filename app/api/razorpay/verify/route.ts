@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { sendOrderStatusEmail } from "@/lib/notifications/order-email";
 
 interface VerifyPaymentBody {
   razorpay_order_id: string;
@@ -79,6 +80,17 @@ export async function POST(request: Request) {
       }
 
       createdOrder = (data as { id: string; status: string } | null) ?? null;
+    }
+
+    const recipientEmail = user?.email ?? body.customer?.email ?? "";
+    if (createdOrder && recipientEmail) {
+      await sendOrderStatusEmail({
+        to: recipientEmail,
+        customerName: body.customer?.full_name ?? "Customer",
+        orderId: createdOrder.id,
+        status: createdOrder.status,
+        totalAmount: Number(body.totalAmount ?? 0),
+      });
     }
 
     return NextResponse.json({
