@@ -126,6 +126,18 @@ export const categories: Category[] = [
 
 // Products - Add or modify products here
 export const products: Product[] = [
+  {
+    id: "p0",
+    name: "Demo Test Product (₹1)",
+    description: "Test-only product for validating Razorpay checkout, order placement, and tracking status updates.",
+    price: 1,
+    image: "https://via.placeholder.com/300x300?text=Demo+Test+Product",
+    category: "seasoning-spices",
+    weight: "1 unit",
+    inStock: true,
+    featured: true,
+  },
+
   // Seeds Category
   {
     id: "p1",
