@@ -15,6 +15,7 @@ declare global {
   interface Window {
     Razorpay?: new (options: Record<string, unknown>) => {
       open: () => void;
+      on: (event: string, handler: (response: unknown) => void) => void;
     };
   }
 }
@@ -171,6 +172,13 @@ export default function CartPage() {
             setIsCheckingOut(false);
           },
         },
+      });
+
+      razorpay.on("payment.failed", () => {
+        setCheckoutMessage(
+          "Direct Razorpay checkout is blocked for this domain. Opening secure payment link fallback.",
+        );
+        openRazorpayMeFallback();
       });
 
       razorpay.open();
