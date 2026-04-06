@@ -180,7 +180,7 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
 
       {isLightboxOpen && (
         <div
-          className="fixed inset-0 z-[90] bg-black/85 backdrop-blur-sm"
+          className="fixed inset-0 z-[90] bg-black/90"
           onClick={() => setIsLightboxOpen(false)}
           role="dialog"
           aria-modal="true"
@@ -222,11 +222,11 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
             </>
           )}
 
-          <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center p-4 sm:p-10">
+          <div className="mx-auto flex h-full w-full items-center justify-center p-4 sm:p-8">
             <img
               src={galleryImages[activeIndex]}
               alt={`${name} fullscreen image ${activeIndex + 1}`}
-              className="max-h-full max-w-full rounded-xl object-contain"
+              className="h-auto w-auto max-h-[82vh] max-w-[92vw] rounded-xl object-contain"
               onClick={(event) => event.stopPropagation()}
             />
           </div>
