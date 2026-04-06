@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
-import { Trash2, ArrowLeft } from "lucide-react";
+import { Trash2, ArrowLeft, CheckCircle2, Flame, Info } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -43,7 +43,10 @@ function buildRazorpayMeLink(baseUrl: string) {
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [checkoutNotice, setCheckoutNotice] = useState<{
+    kind: "success" | "error" | "info";
+    text: string;
+  } | null>(null);
   const supabase = useMemo(() => createClient(), []);
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -55,14 +58,15 @@ export default function CartPage() {
   const openRazorpayMeFallback = () => {
     const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl);
     window.open(paymentLink, "_blank", "noopener,noreferrer");
-    setCheckoutMessage(
-      "Opened Razorpay payment page. Complete payment there, then share transaction details to confirm your order.",
-    );
+    setCheckoutNotice({
+      kind: "info",
+      text: "Opened Razorpay payment page. Complete payment there, then share transaction details to confirm your order.",
+    });
     setIsCheckingOut(false);
   };
 
   const handleCheckout = async () => {
-    setCheckoutMessage(null);
+    setCheckoutNotice(null);
     setIsCheckingOut(true);
 
     const isSdkLoaded = await loadRazorpayScript();
@@ -109,7 +113,7 @@ export default function CartPage() {
           return;
         }
 
-        setCheckoutMessage(orderData.error ?? "Failed to start payment.");
+        setCheckoutNotice({ kind: "error", text: orderData.error ?? "Failed to start payment." });
         setIsCheckingOut(false);
         return;
       }
@@ -153,18 +157,23 @@ export default function CartPage() {
           const verifyData = await verifyRes.json();
 
           if (!verifyRes.ok) {
-            setCheckoutMessage(verifyData.error ?? "Payment completed but order verification failed.");
+            setCheckoutNotice({
+              kind: "error",
+              text: verifyData.error ?? "Payment completed but order verification failed.",
+            });
             setIsCheckingOut(false);
             return;
           }
 
           clearCart();
           const shortOrderId = String(verifyData.orderId ?? "").slice(0, 8).toUpperCase();
-          setCheckoutMessage(
+          setCheckoutNotice({
+            kind: "success",
+            text:
             shortOrderId
-              ? `Yay! Order placed successfully. Order #${shortOrderId}. Track it in My Account > Recent Orders.`
-              : "Yay! Order placed successfully. Track it in My Account > Recent Orders.",
-          );
+              ? `Yay! Your masala magic is packed. Order #${shortOrderId} is now cooking in our kitchen. Track it in My Account > Recent Orders.`
+              : "Yay! Your masala magic is packed. Track it in My Account > Recent Orders.",
+          });
           setIsCheckingOut(false);
         },
         modal: {
@@ -175,15 +184,19 @@ export default function CartPage() {
       });
 
       razorpay.on("payment.failed", () => {
-        setCheckoutMessage(
-          "Direct Razorpay checkout is blocked for this domain. Opening secure payment link fallback.",
-        );
+        setCheckoutNotice({
+          kind: "info",
+          text: "Direct Razorpay checkout is blocked for this domain. Opening secure payment link fallback.",
+        });
         openRazorpayMeFallback();
       });
 
       razorpay.open();
     } catch (error) {
-      setCheckoutMessage(error instanceof Error ? error.message : "Checkout failed.");
+      setCheckoutNotice({
+        kind: "error",
+        text: error instanceof Error ? error.message : "Checkout failed.",
+      });
       setIsCheckingOut(false);
     }
   };
@@ -338,10 +351,30 @@ export default function CartPage() {
                     </span>
                   </div>
 
-                  {checkoutMessage && (
-                    <p className="mb-4 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
-                      {checkoutMessage}
-                    </p>
+                  {checkoutNotice && (
+                    <div
+                      className={`mb-4 rounded-lg border px-3 py-3 text-sm animate-fade-up ${
+                        checkoutNotice.kind === "success"
+                          ? "border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-emerald-50 text-amber-900"
+                          : checkoutNotice.kind === "error"
+                            ? "border-red-200 bg-red-50 text-red-700"
+                            : "border-blue-200 bg-blue-50 text-blue-800"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        {checkoutNotice.kind === "success" ? (
+                          <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-800">
+                            <Flame className="h-3.5 w-3.5" />
+                            Spicy Success
+                          </span>
+                        ) : checkoutNotice.kind === "error" ? (
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-600" />
+                        ) : (
+                          <Info className="mt-0.5 h-4 w-4 text-blue-700" />
+                        )}
+                        <p className="leading-relaxed">{checkoutNotice.text}</p>
+                      </div>
+                    </div>
                   )}
 
                   <Button
