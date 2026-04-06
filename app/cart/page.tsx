@@ -7,7 +7,7 @@ import { useCart } from "@/context/cart-context";
 import { Trash2, ArrowLeft, CheckCircle2, Flame, Info } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getResolvedProductImage } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
 
@@ -40,6 +40,8 @@ function buildRazorpayMeLink(baseUrl: string) {
   return baseUrl.replace(/\/+$/, "");
 }
 
+const CHECKOUT_NOTICE_STORAGE_KEY = "larm_checkout_notice";
+
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -54,6 +56,24 @@ export default function CartPage() {
   const tax = Math.round(subtotal * 0.18);
   const total = Math.round(subtotal * 1.18);
   const razorpayMeBaseUrl = process.env.NEXT_PUBLIC_RAZORPAY_ME_LINK ?? "https://razorpay.me/@adityadhiman";
+
+  useEffect(() => {
+    const stored = window.sessionStorage.getItem(CHECKOUT_NOTICE_STORAGE_KEY);
+    if (!stored) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as { kind: "success" | "error" | "info"; text: string };
+      if (parsed?.kind && parsed?.text) {
+        setCheckoutNotice(parsed);
+      }
+    } catch {
+      // Ignore malformed stored notice payload.
+    } finally {
+      window.sessionStorage.removeItem(CHECKOUT_NOTICE_STORAGE_KEY);
+    }
+  }, []);
 
   const openRazorpayMeFallback = () => {
     const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl);
@@ -167,13 +187,16 @@ export default function CartPage() {
 
           clearCart();
           const shortOrderId = String(verifyData.orderId ?? "").slice(0, 8).toUpperCase();
-          setCheckoutNotice({
+          const successNotice = {
             kind: "success",
             text:
             shortOrderId
               ? `Yay! Your masala magic is packed. Order #${shortOrderId} is now cooking in our kitchen. Track it in My Account > Recent Orders.`
               : "Yay! Your masala magic is packed. Track it in My Account > Recent Orders.",
-          });
+          } as const;
+
+          setCheckoutNotice(successNotice);
+          window.sessionStorage.setItem(CHECKOUT_NOTICE_STORAGE_KEY, JSON.stringify(successNotice));
           setIsCheckingOut(false);
         },
         modal: {
@@ -217,6 +240,31 @@ export default function CartPage() {
 
           {items.length === 0 ? (
             <div className="rounded-xl border border-border bg-card p-12 text-center shadow-sm">
+              {checkoutNotice && (
+                <div
+                  className={`mb-4 rounded-lg border px-3 py-3 text-sm animate-fade-up text-left ${
+                    checkoutNotice.kind === "success"
+                      ? "border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-emerald-50 text-amber-900"
+                      : checkoutNotice.kind === "error"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : "border-blue-200 bg-blue-50 text-blue-800"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    {checkoutNotice.kind === "success" ? (
+                      <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-800">
+                        <Flame className="h-3.5 w-3.5" />
+                        Spicy Success
+                      </span>
+                    ) : checkoutNotice.kind === "error" ? (
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-600" />
+                    ) : (
+                      <Info className="mt-0.5 h-4 w-4 text-blue-700" />
+                    )}
+                    <p className="leading-relaxed">{checkoutNotice.text}</p>
+                  </div>
+                </div>
+              )}
               <p className="mb-4 text-lg text-muted-foreground">Your cart is empty</p>
               <Link href="/products">
                 <Button>Start Shopping</Button>
