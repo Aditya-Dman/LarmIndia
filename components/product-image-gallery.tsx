@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -17,6 +18,7 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const canSlide = galleryImages.length > 1;
@@ -48,6 +50,10 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
 
     touchStartX.current = null;
   };
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isLightboxOpen) {
@@ -178,7 +184,9 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
       </p>
       </div>
 
-      {isLightboxOpen && (
+      {isMounted &&
+        isLightboxOpen &&
+        createPortal(
         <div
           className="fixed inset-0 z-[90] bg-black/90"
           onClick={() => setIsLightboxOpen(false)}
@@ -230,7 +238,8 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
               onClick={(event) => event.stopPropagation()}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
