@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -16,6 +16,7 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
   }, [images]);
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const canSlide = galleryImages.length > 1;
@@ -48,18 +49,57 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
     touchStartX.current = null;
   };
 
+  useEffect(() => {
+    if (!isLightboxOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsLightboxOpen(false);
+        return;
+      }
+
+      if (!canSlide) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goTo(activeIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        goTo(activeIndex + 1);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [activeIndex, canSlide, isLightboxOpen]);
+
   return (
-    <div className="relative">
+    <>
+      <div className="relative">
       <div
         className="group relative aspect-square overflow-hidden rounded-2xl bg-secondary"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <img
-          src={galleryImages[activeIndex]}
-          alt={`${name} image ${activeIndex + 1}`}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
+        <button
+          type="button"
+          onClick={() => setIsLightboxOpen(true)}
+          className="h-full w-full"
+          aria-label="Open fullscreen gallery"
+        >
+          <img
+            src={galleryImages[activeIndex]}
+            alt={`${name} image ${activeIndex + 1}`}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        </button>
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
@@ -136,6 +176,62 @@ export function ProductImageGallery({ images, name, featured }: ProductImageGall
       <p className="mt-2 text-center text-xs text-muted-foreground sm:hidden">
         Swipe left or right to browse images
       </p>
-    </div>
+      </div>
+
+      {isLightboxOpen && (
+        <div
+          className="fixed inset-0 z-[90] bg-black/85 backdrop-blur-sm"
+          onClick={() => setIsLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Product image lightbox"
+        >
+          <button
+            type="button"
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white hover:bg-black/70"
+            aria-label="Close fullscreen gallery"
+          >
+            <X className="h-5 w-5" />
+          </button>
+
+          {canSlide && (
+            <>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  goTo(activeIndex - 1);
+                }}
+                className="absolute left-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/40 text-white hover:bg-black/60"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  goTo(activeIndex + 1);
+                }}
+                className="absolute right-4 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/40 text-white hover:bg-black/60"
+                aria-label="Next image"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+
+          <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center p-4 sm:p-10">
+            <img
+              src={galleryImages[activeIndex]}
+              alt={`${name} fullscreen image ${activeIndex + 1}`}
+              className="max-h-full max-w-full rounded-xl object-contain"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
