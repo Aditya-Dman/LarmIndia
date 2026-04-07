@@ -22,7 +22,7 @@ LarmIndia is a web storefront experience focused on clean UX, fast performance, 
 - **Analytics:** Vercel Analytics
 - **Optional integrations:**
   - **Supabase** (auth/data) via `@supabase/supabase-js` and `@supabase/ssr`
-  - **Razorpay** (payments)
+  - **Demo Razorpay-style checkout** (presentation mode)
 
 ---
 
@@ -73,8 +73,10 @@ Create a `.env.local` file in the project root.
 Common variables you may need:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
+- `ADMIN_EMAILS`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`
+- `ORDER_EMAIL_FROM`
 
 > Note: The exact list depends on what features you enabled in the code.
 

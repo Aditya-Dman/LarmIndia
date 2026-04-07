@@ -11,35 +11,6 @@ import { useEffect, useMemo, useState } from "react";
 import { getResolvedProductImage } from "@/lib/data";
 import { createClient } from "@/lib/supabase/client";
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => {
-      open: () => void;
-      on: (event: string, handler: (response: unknown) => void) => void;
-    };
-  }
-}
-
-function loadRazorpayScript() {
-  return new Promise<boolean>((resolve) => {
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
-
-function buildRazorpayMeLink(baseUrl: string) {
-  return baseUrl.replace(/\/+$/, "");
-}
-
 const CHECKOUT_NOTICE_STORAGE_KEY = "larm_checkout_notice";
 
 export default function CartPage() {
@@ -55,7 +26,6 @@ export default function CartPage() {
   const subtotal = getTotal();
   const tax = Math.round(subtotal * 0.18);
   const total = Math.round(subtotal * 1.18);
-  const razorpayMeBaseUrl = process.env.NEXT_PUBLIC_RAZORPAY_ME_LINK ?? "https://razorpay.me/@adityadhiman";
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(CHECKOUT_NOTICE_STORAGE_KEY);
@@ -75,25 +45,9 @@ export default function CartPage() {
     }
   }, []);
 
-  const openRazorpayMeFallback = () => {
-    const paymentLink = buildRazorpayMeLink(razorpayMeBaseUrl);
-    window.open(paymentLink, "_blank", "noopener,noreferrer");
-    setCheckoutNotice({
-      kind: "info",
-      text: "Opened Razorpay payment page. Complete payment there, then share transaction details to confirm your order.",
-    });
-    setIsCheckingOut(false);
-  };
-
   const handleCheckout = async () => {
     setCheckoutNotice(null);
     setIsCheckingOut(true);
-
-    const isSdkLoaded = await loadRazorpayScript();
-    if (!isSdkLoaded || !window.Razorpay) {
-      openRazorpayMeFallback();
-      return;
-    }
 
     const { data: authData } = await supabase.auth.getUser();
     const user = authData.user;
@@ -113,108 +67,40 @@ export default function CartPage() {
     }));
 
     try {
-      const orderRes = await fetch("/api/razorpay/order", {
+      await new Promise((resolve) => window.setTimeout(resolve, 900));
+
+      const orderRes = await fetch("/api/demo/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: total * 100,
-          currency: "INR",
+          totalAmount: total,
+          items: itemPayload,
+          customer,
         }),
       });
 
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
-        const errorText = String(orderData.error ?? "").toLowerCase();
-        if (errorText.includes("key") || errorText.includes("configured")) {
-          openRazorpayMeFallback();
-          return;
-        }
-
         setCheckoutNotice({ kind: "error", text: orderData.error ?? "Failed to start payment." });
         setIsCheckingOut(false);
         return;
       }
 
-      const razorpay = new window.Razorpay({
-        key: orderData.keyId,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Larm India",
-        description: `Order payment for ${itemCount} item(s)`,
-        order_id: orderData.orderId,
-        prefill: {
-          name: customer.full_name,
-          email: customer.email,
-          contact: customer.phone,
-        },
-        notes: {
-          address: customer.address,
-        },
-        theme: {
-          color: "#c15512",
-        },
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          const verifyRes = await fetch("/api/razorpay/verify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              ...response,
-              totalAmount: total,
-              items: itemPayload,
-              customer,
-            }),
-          });
+      clearCart();
+      const shortOrderId = String(orderData.orderId ?? "").slice(0, 8).toUpperCase();
+      const successNotice = {
+        kind: "success",
+        text: shortOrderId
+          ? `Yay! Demo Razorpay checkout successful. Order #${shortOrderId} is now cooking in our kitchen. Track it in My Account > Recent Orders.`
+          : "Yay! Demo Razorpay checkout successful. Track it in My Account > Recent Orders.",
+      } as const;
 
-          const verifyData = await verifyRes.json();
-
-          if (!verifyRes.ok) {
-            setCheckoutNotice({
-              kind: "error",
-              text: verifyData.error ?? "Payment completed but order verification failed.",
-            });
-            setIsCheckingOut(false);
-            return;
-          }
-
-          clearCart();
-          const shortOrderId = String(verifyData.orderId ?? "").slice(0, 8).toUpperCase();
-          const successNotice = {
-            kind: "success",
-            text:
-            shortOrderId
-              ? `Yay! Your masala magic is packed. Order #${shortOrderId} is now cooking in our kitchen. Track it in My Account > Recent Orders.`
-              : "Yay! Your masala magic is packed. Track it in My Account > Recent Orders.",
-          } as const;
-
-          setCheckoutNotice(successNotice);
-          window.sessionStorage.setItem(CHECKOUT_NOTICE_STORAGE_KEY, JSON.stringify(successNotice));
-          setIsCheckingOut(false);
-        },
-        modal: {
-          ondismiss: () => {
-            setIsCheckingOut(false);
-          },
-        },
-      });
-
-      razorpay.on("payment.failed", () => {
-        setCheckoutNotice({
-          kind: "info",
-          text: "Direct Razorpay checkout is blocked for this domain. Opening secure payment link fallback.",
-        });
-        openRazorpayMeFallback();
-      });
-
-      razorpay.open();
+      setCheckoutNotice(successNotice);
+      window.sessionStorage.setItem(CHECKOUT_NOTICE_STORAGE_KEY, JSON.stringify(successNotice));
+      setIsCheckingOut(false);
     } catch (error) {
       setCheckoutNotice({
         kind: "error",
@@ -363,6 +249,9 @@ export default function CartPage() {
               {/* Order Summary */}
               <div className="lg:col-span-1">
                 <div className="rounded-xl border border-border bg-card p-6 sticky top-24 shadow-lg">
+                  <p className="mb-2 inline-flex items-center rounded-full border border-amber-300/60 bg-amber-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                    Demo Razorpay Checkout
+                  </p>
                   <h2 className="mb-4 text-lg font-semibold text-foreground">
                     Order Summary
                   </h2>
@@ -430,7 +319,7 @@ export default function CartPage() {
                     disabled={isCheckingOut}
                     className="w-full mb-3"
                   >
-                    {isCheckingOut ? "Opening Razorpay..." : "Proceed to Checkout"}
+                    {isCheckingOut ? "Processing Demo Checkout..." : "Proceed with Demo Razorpay"}
                   </Button>
 
                   <Button
